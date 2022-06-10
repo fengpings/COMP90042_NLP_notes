@@ -2116,3 +2116,191 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Other generation tasks such as dialogue generation
 
 ## Lecture 18 Information Extraction
+- information extraction
+	- Given this: *“Brasilia, the Brazilian capital, was founded in 1960.”*
+	- Obtain this:
+		- capital(Brazil, Brasilia)
+		- founded(Brasilia, 1960)
+	- Main goal: turn text into structured data
+- applications
+	- Stock analysis
+		- Gather information from news and social media
+		- Summarise texts into a structured format
+		- Decide whether to buy/sell at current stock price
+	- Medical research
+		- Obtain information from articles about diseases and treatments
+		- Decide which treatment to apply for new patient
+- how
+	- Two steps:
+		- **Named Entity Recognition (NER)**: find out entities such as “Brasilia” and “1960”
+		- **Relation Extraction**: use context to find the relation between “Brasilia” and “1960” (“founded”)
+- machine learning in IE
+	- Named Entity Recognition (NER): sequence models such as RNNs, HMMs or CRFs.
+	- Relation Extraction: mostly classifiers, either binary or multi-class.
+	- This lecture: how to frame these two tasks in order to apply sequence labellers and classifiers.
+
+### Named Entity Recognition
+![](img/ie1.png) ![](img/ie2.png)
+
+- typical entity tags
+	- **PER**: people, characters
+	- **ORG**: companies, sports teams
+	- **LOC**: regions, mountains, seas
+	- **GPE**: countries, states, provinces (in some tagset this is labelled as **LOC**)
+	- **FAC**: bridges, buildings, airports
+	- **VEH**: planes, trains, cars
+	- Tag-set is application-dependent: some domains deal with specific entities e.g. proteins and genes
+- NER as sequnce labelling
+	- NE tags can be ambiguous:
+		- “Washington” can be a person, location or political entity
+	- Similar problem when doing POS tagging
+		- Incorporate context
+	- Can we use a sequence tagger for this (e.g. HMM)?
+		- No, as entities can span multiple tokens
+		- Solution: modify the tag set
+	- IO tagging
+		- [<font color=blue>ORG</font> **American Airlines**], a unit of [<font color=blue>ORG</font> **AMR Corp.**], immediately matched the move, spokesman [<font color=red>PER</font> **Tim Wagner**] said.
+		- ‘<font color=blue>I-ORG</font>’ represents a token that is inside an entity (<font color=blue>ORG</font> in this case).
+		- All tokens which are not entities get the ‘O’ token (for **outside**).
+		- Cannot differentiate between:
+			- a single entity with multiple tokens
+			- multiple entities with single tokens ![](img.ie3.png)
+	- IOB tagging
+		- [<font color=blue>ORG</font> **American Airlines**], a unit of [<font color=blue>ORG</font> **AMR Corp.**], immediately matched the move, spokesman [<font color=red>PER</font> **Tim Wagner**] said.
+		- <font color=blue>B-ORG</font> represents the beginning of an <font color=blue>ORG</font> entity.
+		- If the entity has more than one token, subsequent tags are represented as <font color=blue>I-ORG</font>. ![](img/ie4.png)
+		- example: annotate the following sentence with NER tags(IOB)
+			- *Steves Jobs founded Apple Inc. in 1976*, Tageset: PER, ORG, LOC, TIME
+	- NER as sequence labelling
+		- Given such tagging scheme, we can train any sequence labelling model
+		- In theory, HMMs can be used but **discriminative** models such as CRFs are preferred
+	- NER
+		- features
+			- Example: *L’Occitane*
+			- Prefix/suffix:
+				- L / L’ / L’O / L’Oc / …
+				- e / ne / ane / tane / …
+			- Word shape:
+				- X’Xxxxxxxx / X’Xx
+				- XXXX-XX-XX (date!)
+			- POS tags / syntactic chunks: many entities are nouns or noun phrases.
+			- Presence in a gazeteer: lists of entities, such as place names, people’s names and surnames, etc. ![](img/ie5.png)
+		- classifier ![](img/ie6.png)
+		- deep learning for NER
+			- State of the art approach uses LSTMs with character and word embeddings (Lample et al. 2016) ![](img/ie7.png)
+
+### Relation Extraction
+- relation extraction
+	- [ORG **American Airlines**], a unit of [ORG **AMR Corp.**], immediately matched the move, spokesman [PER **Tim Wagner**] said.
+	- Traditionally framed as triple extraction:
+		- unit(American Airlines, AMR Corp.)
+		- spokesman(Tim Wagner, American Airlines)
+	- Key question: do we know all the possible relations?
+		- unit(American Airlines, AMR Corp.) → subsidiary
+		- spokesman(Tim Wagner, American Airlines) → employment ![](img/ie8.png)
+- methods
+	- If we have access to a fixed relation database:
+		- Rule-based
+		- Supervised
+		- Semi-supervised
+		- Distant supervision
+	- If no restrictions on relations:
+		- Unsupervised
+		- Sometimes referred as “OpenIE”
+	- rule-based relation extraction
+		- *“Agar is a substance prepared from a mixture of red algae such as Gelidium, for laboratory or industrial use.”*
+		- [NP red algae] such as [NP Gelidium]
+		- NP0 such as NP1 → hyponym(NP1, NP0)
+		- hyponym(Gelidium, red algae)
+		- Lexico-syntactic patterns: high precision, low recall, manual effort required
+		- more rules ![](img/ie9.png)
+	- supervised relation extraction
+		- Assume a corpus with annotated relations
+		- Two steps 
+			- First, find if an entity pair is related or not (binary classification)
+				- For each sentence, gather all possible entity pairs
+				- Annotated pairs are considered positive examples
+				- Non-annotated pairs are taken as negative examples
+			- Second, for pairs predicted as positive, use a multiclass classifier (e.g. SVM) to obtain the relation
+			- example
+				- [ORG **American Airlines**], a unit of [ORG **AMR Corp.**], immediately matched the move, spokesman [PER **Tim Wagner**] said.
+				- First:
+					- (American Airlines, AMR Corp.) → positive
+					- (American Airlines, Tim Wagner) → positive
+					- (AMR Corp., Tim Wagner) → negative
+				- Second:
+					- (American Airlines, AMR Corp.) → subsidiary
+					- (American Airlines, Tim Wagner) → employment
+		- features
+			- <font color=red>[ORG **American Airlines**]</font>, a unit of [ORG **AMR Corp.**], immediately matched the move, spokesman <font color=red>[PER **Tim Wagner**]</font> said.
+			- (American Airlines, Tim Wagner) → employment ![](img/ie10.png)
+	- semi-supervised relation extraction
+		- Annotated corpora is very expensive to create
+		- Use seed tuples to bootstrap a classifier
+		- steps:
+		
+			1. Given seed tuple: hub(Ryanair, Charleroi)
+			2. Find sentences containing terms in seed tuples
+				- *Budget airline* ***Ryanair***, *which uses* ***Charleroi*** *as a hub*, *scrapped all weekend flights out of the airport*			3. Extract general patterns
+				- [ORG], which uses [LOC] as a hub			4. Find new tuples with these patterns
+				- hub(Jetstar, Avalon)
+			5. Add these new tuples to existing tuples and repeat step 2
+		
+		- issues
+			- Difficult to create seed tuples
+			- Extracted tuples deviate from original relation over time
+			- Difficult to evaluate
+			- Tend not to find many novel tuples given seed tuples
+			- Extracted general patterns tend to be very noisy
+		- semantic drift
+			- Pattern: [NP] has a {NP}\* hub at [LOC]
+			- Sydney has a ferry hub at Circular Quay
+				- hub(Sydney, Circular Quay)
+			- More erroneous patterns extracted from this tuple…
+			- Should only accept patterns with high confidences
+		- distant supervision
+			- Semi-supervised methods assume the existence of seed tuples to mine new tuples
+			- Can we mine new tuples directly?
+			- Distant supervision obtain new tuples from a range of sources:
+				- DBpedia
+				- Freebase ![](img/ie11.png)
+			- Generate massive training sets, enabling the use of richer features, and no risk of semantic drift
+	- unsupervised relation extraction
+		- No fixed or closed set of relations
+		- Relations are sub-sentences; usually has a verb
+		- “United has a hub in Chicago, which is the headquarters of United Continental Holdings.”
+			- “has a hub in”(United, Chicago)
+			- “is the headquarters of”(Chicago, United Continental Holdings)
+		- Main problem: mapping relations into canonical forms
+	- evaluation
+		- NER: F1-measure at the entity level.
+		- Relation Extraction with known relation set: F1-measure
+		- Relation Extraction with unknown relations: much harder to evaluate
+			- Usually need some human evaluation
+			- Massive datasets used in these settings are impractical to evaluate manually (use samples)
+			- Can only obtain (approximate) precision, not recall
+
+### Other IE Tasks
+- temporal expression extraction
+
+	“<font color=blue>[TIME **July 2, 2007**]</font>: A fare increase initiated <font color=red>[TIME **last week**]</font> by UAL Corp’s United Airlines was matched by competitors over [TIME **the weekend**], marking the second successful fare increase in [TIME **two weeks**].”
+	
+	- **Anchoring**: when is <font color=red>“last week”</font>?
+		- <font color=red>“last week”</font> → 2007−W26
+	- **Normalisation**: mapping expressions to canonical forms.
+		- <font color=blue>July 2, 2007</font> → 2007-07-02
+	- Mostly rule-based approaches
+- event extraction
+	- “American Airlines, a unit of AMR Corp., immediately [EVENT **matched**] [EVENT **the move**], spokesman Tim Wagner [EVENT **said**].”
+	- Very similar to NER, including annotation and learning methods.
+	- Event ordering: detect how a set of events happened in a timeline.
+	- Involves both event extraction and temporal expression extraction.
+
+### Conclusion
+- Information Extraction is a vast field with many different tasks and applications
+	- Named Entity Recognition
+	- Relation Extraction
+	- Event Extraction
+- Machine learning methods involve classifiers and sequence labelling models.
+
+## Lecture 19 Question Answering
