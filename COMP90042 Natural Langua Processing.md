@@ -834,7 +834,7 @@ RNN seems to have the capability to model infinite context. In practice it can't
 			- long vs. short
 			- big vs. little
 		- Hypernymy: is-a relation
-			- at is an animal
+			- cat is an animal
 			- mango is a fruit
 		- Meronymy: part-whole relation
 			- leg is part of a chair
@@ -1966,7 +1966,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 - MT is difficult
 	- Not just simple word for word translation
 	- Structural changes, e.g., syntax and semantics
-	- Multiple word translations, idioms(x)
+	- Multiple word translations, idioms(习语，成语，方言)
 	- Inflections for gender, case etc
 	- Missing information (e.g., determiners) ![](img/mt2.png)
 
@@ -1978,7 +1978,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Use bilingual dictionary to map Russian words to English words
 	- Goal: translate 1-2 million words an hour within 5 years
 - statistical MT
-	- Given French sentence f, aim is to find the best English sentence e
+	- Given French sentence *f*, aim is to find the best English sentence *e*
 		- $argmax_eP(e|f)$
 	- Use Baye’s rule to decompose into two components
 		- $argmax_e\color{blue}{P(f|e)}\color{red}{P(e)}$
@@ -1990,7 +1990,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			- learns how to translate words and phrases from English to French
 	- how to learn LM and TM
 		- Language model:
-			- Text statistics in large **monolingual corpora**
+			- Text statistics in large **monolingual(仅一种语言的) corpora** (n-gram models)
 		- Translation model:
 			- Word co-occurrences in **parallel corpora**
 			- i.e. English-French sentence pairs
@@ -2001,10 +2001,10 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			- Open parallel corpus: http://opus.nlpl.eu/
 	- models of translation
 		- how to learn $P(f|e)$ from paralell text?
-		- We only have sentence pairs; words are not aligned in the parallel text
+		- We only have sentence pairs; **words are not aligned** in the parallel text
 		- I.e. we don’t have word to word translation ![](img/mt3.png)
 	- alignment
-		- Idea: introduce word alignment as a latent variable into the model
+		- Idea: introduce **word alignment** as a latent variable into the model
 			- $P(f,a|e)$
 		- Use algorithms such as expectation maximisation (EM) to learn (e.g. GIZA++) ![](img/mt4.png)
 		- complexity
@@ -2023,12 +2023,14 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 - introduction
 	- Neural machine translation is a new approach to do machine translation
 	- Use a single neural model to directly translate from source to target
+	- from model perspective, a lot simpler
+	- from achitecture perspective, easier to maintain
 	- Requires parallel text
 	- Architecture: encoder-decoder model
 		- 1st RNN to encode the source sentence
 		- 2nd RNN to decode the target sentence ![](img/mt9.png)
 - neural MT
-	- The decoder RNN can be interpreted as a conditional language model
+	- The decoder RNN can be interpreted as a **conditional language model**
 		- Language model: <font color=blue>predicts the next word given previous words in target sentence y</font>
 		- Conditional: <font color=red>prediction is also conditioned on the source sentence *x*</font>
 	- $P(y|x)=P(y_1|x)P(y_2|y_1,x)...P(y_t|\color{blue}{y_1,...,y_{t-1}},\color{red}{x})$
@@ -2042,10 +2044,10 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- But at test time, we don’t have the target sentence (that’s what we’re trying to predict!)
 		- **argmax**: take the word with the highest probability at every step
 		- exposure bias
-			- Describes the discrepancy between training and testing
+			- Describes the discrepancy(差异) between training and testing
 			- Training: always have the ground truth tokens at each step
 			- Test: uses its own prediction at each step
-			- Outcome: model is unable to recover from its own error
+			- Outcome: model is unable to recover from its own error(error propagation) ![](img/mt.png)
 		- greedy decoding
 			- argmax decoding is also called greedy decoding
 			- Issue: does not guarantee optimal probability $P(y|x)$
@@ -2059,7 +2061,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			- k = beam width (typically 5 to 10)
 			- k = 1 = greedy decoding
 			- k = V = exhaustive search decoding
-			- exampe: ![](img/mt12.png) ![](img/mt13.png) ![](img/mt14.png) ![](img/mt15.png) ![](img/mt16.png) ![](img/mt17.png) ![](img/mt18.png) ![](img/mt19.png)
+			- example: ![](img/mt12.png) ![](img/mt13.png) ![](img/mt14.png) ![](img/mt15.png) ![](img/mt16.png) ![](img/mt17.png) ![](img/mt18.png) ![](img/mt19.png)
 		- when to stop
 			- When decoding, we stop when we generate <end> token
 			- But multiple hypotheses may terminate their sentence at different time steps
@@ -2068,19 +2070,19 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- issues of NMT
 		- Information of the whole source sentence is represented by a single vector
 		- NMT can generate new details not in source sentence
-		- NMT tend to generate not very fluent sentences
+		- NMT tend to generate not very fluent sentences ($\times$, usually fluent, a strength)
 		- Black-box model; difficult to explain when it doesn’t work
 	- summary
 		- Single end-to-end model
 			- Statistical MT systems have multiple subcomponents
 			- Less feature engineering
-			- Can produce new details that are not in the source sentence (hallucination)
+			- Can produce new details that are not in the source sentence (hallucination:错觉，幻觉)
 
 ### Attention Mechanism
 ![](img/mt20.png)
 
 - With a long source sentence, the <font color=orange>encoded vector</font> is unlikely to capture all the information in the sentence
-- This creates an **information bottleneck**
+- This creates an **information bottleneck**(cannot capture all information in a long sentence in a single short vector)
 - attention
 	- For the decoder, at every time step allow it to **‘attend’** to words in the source sentence ![](img/mt21.png) ![](img/mt22.png) ![](img/mt23.png) ![](img/mt24.png)
 	- encoder-decoder with attention ![](img/mt25.png)
@@ -2091,15 +2093,15 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			- additive: v^Ttanh(W_ss_t+W_hh_i)
 		- $c_t$ can be injected to the current state ($s_t$), or to the input word ($y_t$)
 	- summary
-		- Solves the information bottleneck issue by allowing decoder to have access to the source sentence words directly
-		- Provides some form of interpretability
+		- Solves the information bottleneck issue by allowing decoder to have access to the source sentence words directly(reduce hallucination a bit, direct access to source words, less likely to generate new words not related to source sentence)
+		- Provides some form of interpretability (look at attention distribution to see what source word is attended to)
 			- Attention weights can be seen as word alignments
 		- Most state-of-the-art NMT systems use attention
 			- Google Translate (https://slator.com/technology/google-facebook-amazonneural-machine-translation-just-had-its-busiest-month-ever/)
 
 ### Evaluation
 - MT evaluation
-	- BLEU: compute n-gram overlap between “reference” translation and generated translation
+	- BLEU: compute n-gram overlap between “reference” translation(ground truth) and generated translation
 	- Typically computed for 1 to 4-gram
 		- $BLEU=BP\times exp(\frac{1}{N}\sum_n^Nlogp_n)$, where BP $\to$ <font color=red>"Brevity Penalty" to penalise short outputs</font>
 		- $p_n=\frac{\# \  correct \  n-grams}{\# \  predicted \  n-grams}$
