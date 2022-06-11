@@ -2121,7 +2121,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Obtain this:
 		- capital(Brazil, Brasilia)
 		- founded(Brasilia, 1960)
-	- Main goal: turn text into structured data
+	- Main goal: turn **text** into **structured data**
 - applications
 	- Stock analysis
 		- Gather information from news and social media
@@ -2142,38 +2142,39 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 ### Named Entity Recognition
 ![](img/ie1.png) ![](img/ie2.png)
 
-- typical entity tags
-	- **PER**: people, characters
-	- **ORG**: companies, sports teams
-	- **LOC**: regions, mountains, seas
-	- **GPE**: countries, states, provinces (in some tagset this is labelled as **LOC**)
-	- **FAC**: bridges, buildings, airports
-	- **VEH**: planes, trains, cars
+- typical entity tags (types of tags to use depend on domains)
+	- **PER**(people): people, characters
+	- **ORG**(organisation): companies, sports teams
+	- **LOC**(natural location): regions, mountains, seas
+	- **GPE**(man-made locations): countries, states, provinces (in some tagset this is labelled as **LOC**)
+	- **FAC**(facility): bridges, buildings, airports
+	- **VEH**(vehcle): planes, trains, cars
 	- Tag-set is application-dependent: some domains deal with specific entities e.g. proteins and genes
 - NER as sequnce labelling
 	- NE tags can be ambiguous:
 		- “Washington” can be a person, location or political entity
 	- Similar problem when doing POS tagging
-		- Incorporate context
+		- possible solution: Incorporate(包含) context
 	- Can we use a sequence tagger for this (e.g. HMM)?
-		- No, as entities can span multiple tokens
+		- No, as entities can span multiple tokens(multiple words)
 		- Solution: modify the tag set
-	- IO tagging
+	- IO(inside,outside) tagging
 		- [<font color=blue>ORG</font> **American Airlines**], a unit of [<font color=blue>ORG</font> **AMR Corp.**], immediately matched the move, spokesman [<font color=red>PER</font> **Tim Wagner**] said.
 		- ‘<font color=blue>I-ORG</font>’ represents a token that is inside an entity (<font color=blue>ORG</font> in this case).
 		- All tokens which are not entities get the ‘O’ token (for **outside**).
 		- Cannot differentiate between:
 			- a single entity with multiple tokens
 			- multiple entities with single tokens ![](img.ie3.png)
-	- IOB tagging
+	- IOB(beginning) tagging
 		- [<font color=blue>ORG</font> **American Airlines**], a unit of [<font color=blue>ORG</font> **AMR Corp.**], immediately matched the move, spokesman [<font color=red>PER</font> **Tim Wagner**] said.
-		- <font color=blue>B-ORG</font> represents the beginning of an <font color=blue>ORG</font> entity.
+		- <font color=blue>B-ORG</font> represents the *beginning* of an <font color=blue>ORG</font> entity.
 		- If the entity has more than one token, subsequent tags are represented as <font color=blue>I-ORG</font>. ![](img/ie4.png)
 		- example: annotate the following sentence with NER tags(IOB)
 			- *Steves Jobs founded Apple Inc. in 1976*, Tageset: PER, ORG, LOC, TIME
+				- [B-PER **Steves**] [I-PER **Jobs**] [O founded] [B-ORG **Apple**] [I-ORG **Inc.**] [O **in**] [B-Time **1976**]
 	- NER as sequence labelling
 		- Given such tagging scheme, we can train any sequence labelling model
-		- In theory, HMMs can be used but **discriminative** models such as CRFs are preferred
+		- In theory, HMMs can be used but **discriminative** models such as CRFs are preferred (HMMs cannot incorperate new features)
 	- NER
 		- features
 			- Example: *L’Occitane*
@@ -2184,7 +2185,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 				- X’Xxxxxxxx / X’Xx
 				- XXXX-XX-XX (date!)
 			- POS tags / syntactic chunks: many entities are nouns or noun phrases.
-			- Presence in a gazeteer: lists of entities, such as place names, people’s names and surnames, etc. ![](img/ie5.png)
+			- Presence in a **gazeteer**: lists of entities, such as place names, people’s names and surnames, etc. ![](img/ie5.png)
 		- classifier ![](img/ie6.png)
 		- deep learning for NER
 			- State of the art approach uses LSTMs with character and word embeddings (Lample et al. 2016) ![](img/ie7.png)
@@ -2192,10 +2193,11 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 ### Relation Extraction
 - relation extraction
 	- [ORG **American Airlines**], a unit of [ORG **AMR Corp.**], immediately matched the move, spokesman [PER **Tim Wagner**] said.
-	- Traditionally framed as triple extraction:
+	- Traditionally framed as triple(a relation and two entities) extraction:
 		- unit(American Airlines, AMR Corp.)
 		- spokesman(Tim Wagner, American Airlines)
 	- Key question: do we know all the possible relations?
+		- map relations to a closed set of relations
 		- unit(American Airlines, AMR Corp.) → subsidiary
 		- spokesman(Tim Wagner, American Airlines) → employment ![](img/ie8.png)
 - methods
@@ -2209,14 +2211,15 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Sometimes referred as “OpenIE”
 	- rule-based relation extraction
 		- *“Agar is a substance prepared from a mixture of red algae such as Gelidium, for laboratory or industrial use.”*
-		- [NP red algae] such as [NP Gelidium]
+		- identify linguitics patterns in sentence
+		- **[NP red algae]** such as **[NP Gelidium]**
 		- NP0 such as NP1 → hyponym(NP1, NP0)
 		- hyponym(Gelidium, red algae)
-		- Lexico-syntactic patterns: high precision, low recall, manual effort required
+		- Lexico-syntactic patterns: high precision, low recall(unlikely to recover all patterns, so many linguistic patterns!), manual effort required
 		- more rules ![](img/ie9.png)
 	- supervised relation extraction
 		- Assume a corpus with annotated relations
-		- Two steps 
+		- Two steps (if only one step, class imbalance problem: most entities have no relations!)
 			- First, find if an entity pair is related or not (binary classification)
 				- For each sentence, gather all possible entity pairs
 				- Annotated pairs are considered positive examples
@@ -2225,18 +2228,18 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			- example
 				- [ORG **American Airlines**], a unit of [ORG **AMR Corp.**], immediately matched the move, spokesman [PER **Tim Wagner**] said.
 				- First:
-					- (American Airlines, AMR Corp.) → positive
-					- (American Airlines, Tim Wagner) → positive
-					- (AMR Corp., Tim Wagner) → negative
+					- (American Airlines, AMR Corp.) $\to$ positive
+					- (American Airlines, Tim Wagner) $\to$ positive
+					- (AMR Corp., Tim Wagner) $\to$ negative
 				- Second:
-					- (American Airlines, AMR Corp.) → subsidiary
-					- (American Airlines, Tim Wagner) → employment
+					- (American Airlines, AMR Corp.) $\to$ subsidiary
+					- (American Airlines, Tim Wagner) $\to$ employment
 		- features
 			- <font color=red>[ORG **American Airlines**]</font>, a unit of [ORG **AMR Corp.**], immediately matched the move, spokesman <font color=red>[PER **Tim Wagner**]</font> said.
-			- (American Airlines, Tim Wagner) → employment ![](img/ie10.png)
+			- (American Airlines, Tim Wagner) $\to$ employment ![](img/ie10.png)
 	- semi-supervised relation extraction
 		- Annotated corpora is very expensive to create
-		- Use seed tuples to bootstrap a classifier
+		- Use seed tuples to bootstrap a classifier (use seed to find more training data)
 		- steps:
 		
 			1. Given seed tuple: hub(Ryanair, Charleroi)
@@ -2247,38 +2250,36 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			5. Add these new tuples to existing tuples and repeat step 2
 		
 		- issues
-			- Difficult to create seed tuples
 			- Extracted tuples deviate from original relation over time
-			- Difficult to evaluate
-			- Tend not to find many novel tuples given seed tuples
+				- semantic drift(deviate from original relation)
+					- Pattern: [NP] has a {NP}\* hub at [LOC]
+					- *Sydney has a ferry hub at Circular Quay*
+						- hub(Sydney, Circular Quay)
+					- More erroneous(错误的) patterns extracted from this tuple…
+					- Should only accept patterns with high confidences 
+			- Difficult to evaluate(no labels for new extracted tuples)
 			- Extracted general patterns tend to be very noisy
-		- semantic drift
-			- Pattern: [NP] has a {NP}\* hub at [LOC]
-			- Sydney has a ferry hub at Circular Quay
-				- hub(Sydney, Circular Quay)
-			- More erroneous patterns extracted from this tuple…
-			- Should only accept patterns with high confidences
-		- distant supervision
-			- Semi-supervised methods assume the existence of seed tuples to mine new tuples
-			- Can we mine new tuples directly?
-			- Distant supervision obtain new tuples from a range of sources:
-				- DBpedia
-				- Freebase ![](img/ie11.png)
-			- Generate massive training sets, enabling the use of richer features, and no risk of semantic drift
+	- distant supervision
+		- Semi-supervised methods assume the existence of seed tuples to mine new tuples
+		- Can we mine new tuples directly?
+		- Distant supervision obtain new tuples from a range of sources:
+			- DBpedia
+			- Freebase ![](img/ie11.png)
+		- Generate massive training sets, enabling the use of richer features, and no risk of semantic drift
 	- unsupervised relation extraction
 		- No fixed or closed set of relations
-		- Relations are sub-sentences; usually has a verb
+		- **Relations are sub-sentences**; usually has a verb
 		- “United has a hub in Chicago, which is the headquarters of United Continental Holdings.”
 			- “has a hub in”(United, Chicago)
 			- “is the headquarters of”(Chicago, United Continental Holdings)
-		- Main problem: mapping relations into canonical forms
+		- Main problem: so many relation forms! mapping relations into canonical forms
 	- evaluation
 		- NER: F1-measure at the entity level.
 		- Relation Extraction with known relation set: F1-measure
 		- Relation Extraction with unknown relations: much harder to evaluate
 			- Usually need some human evaluation
 			- Massive datasets used in these settings are impractical to evaluate manually (use samples)
-			- Can only obtain (approximate) precision, not recall
+			- Can only obtain (approximate) precision, not recall(too many possible relations!)
 
 ### Other IE Tasks
 - temporal expression extraction
@@ -2289,12 +2290,12 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- <font color=red>“last week”</font> → 2007−W26
 	- **Normalisation**: mapping expressions to canonical forms.
 		- <font color=blue>July 2, 2007</font> → 2007-07-02
-	- Mostly rule-based approaches
+	- Mostly **rule-based** approaches
 - event extraction
 	- “American Airlines, a unit of AMR Corp., immediately [EVENT **matched**] [EVENT **the move**], spokesman Tim Wagner [EVENT **said**].”
-	- Very similar to NER, including annotation and learning methods.
-	- Event ordering: detect how a set of events happened in a timeline.
-	- Involves both event extraction and temporal expression extraction.
+	- Very similar to NER but different tags, including annotation and learning methods.
+	- **Event ordering**: detect how a set of events happened in a timeline.
+		- Involves both event extraction and temporal expression extraction.
 
 ### Conclusion
 - Information Extraction is a vast field with many different tasks and applications
@@ -2307,7 +2308,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 ### introduction
 - Definition: question answering (“QA”) is the task of automatically determining the answer for a natural language question
 - Mostly focus on “factoid” questions
-- factoid question
+- factoid question(not ambiguious)
 	- Factoid questions, have short precise answers:
 		- What war involved the battle of Chapultepec?
 		- What is the date of Boxing Day?
@@ -2320,21 +2321,22 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 - why focus on factoid questions
 	- They are easier
 	- They have an objective answer
-	- Current NLP technologies cannot handle non-factoid answers
-	- There’s less demand for systems to automatically answer non-factoid questions
+	- Current NLP technologies cannot handle non-factoid answers(under developing)
 - 2 key approaches
 	- Information retrieval-based QA
 		- Given a query, search relevant documents
-		- Find answers within these relevant documents
+		- extract answers within these relevant documents
 	- Knowledge-based QA
 		- Builds semantic representation of the query
 		- Query database of facts to find answers
 
-### IR-based QA
+### IR-based QA (dominant approach)
 - IR-based factoid QA: TREC-QA ![](img/qa1.png)
 	1. Use question to make query for IR engine
-	2. Find document, and passage within document
-	3. Extract short answer string
+		- query formulation: extract key terms to search for documents in the database
+		- answer type detection: guess what type of answer is the question looking for
+	2. Find document, and passage(段，章) within document(find most relevant passages)
+	3. Extract short answer string(use relevant passages and answer type information)
 - question processing
 	- Find key parts of question that will help retrieval
 		- Discard non-content words/symbols (wh-word, ?, etc)
@@ -2349,18 +2351,18 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Knowing the type of answer can help in:
 		- finding the right passage containing the answer
 		- finding the answer string
-	- Treat as classification
+	- Treat as classification (a closed set of answer types)
 		- given question, predict answer type
 		- key feature is question <font color=red>headword</font>
 		- *What are the <font color=red>animals</font> on the Australian coat of arms*?
 		- Generally not a difficult task ![](img/qa2.png) ![](img/qa3.png)
 - retrieval
-	- Find top n documents matching query (standard IR)
+	- Find top *n* documents matching query (standard IR)
 	- Next find passages (paragraphs or sentences) in these documents (also driven by IR)
-	- Should contain:
+	- a good passage should contain:
 		- many instances of the question keywords
 		- several named entities of the answer type
-		- close proximity of these terms in the passage
+		- close proximity(靠近) of these terms in the passage
 		- high ranking by IR engine
 	- Re-rank IR outputs to find best passage (e.g., using supervised learning)
 - answer extraction
@@ -2369,39 +2371,257 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- *The Division of Melbourne is an Australian Electoral Division in Victoria, represented since the 2010 election by <font color=red>_Adam Bandt_</font>, a member of the Greens.*
 		- “How many Australian PMs have there been since 2013?”
 		- *Australia has had <font color=red>_five_</font> prime ministers in five years. No wonder Merkel needed a cheat sheet at the G-20.*
-- how?
-	- Use a neural network to extract answer
-	- AKA reading comprehension task
-	- But deep learning models require lots of data
-	- Do we have enough data to train comprehension models?
-- MCTest
-	- Crowdworkers write fictional stories, questions and answers
-	- 500 stories, 2000 questions
-	- Multiple choice questions ![](img/qa4.png)
-- SQuAD
-	- Use Wikipedia passages
-	- First set of crowdworkers create questions (given passage)
-	- Second set of crowdworkers label the answer
-	- 150K questions (!)
-	- Second version includes unanswerable questions ![](img/qa5.png)
-- reading comprehension
-	- Given a question and context passage, **predict where the answer span starts and end in passage**?
-	- Compute:
-		- $P_{start}(i)$: prob. of token i is the starting token
-		- $P_{end}(i)$: prob. of token i is the ending token ![](img/qa6.png)
-- LSTM-based model
-	- Feed question tokens to a bidirectional LSTM
-	- Aggregate LSTM outputs via weighted sum to produce *q*, the final q question embedding ![](img/qa7.png)
-	- Process passage in a similar way, using another bidirectional LSTM
-	- More than just word embeddings as input
-		- A feature to denote whether the word matches a question word
-		- POS feature
-		- Weighted question embedding: produced by attending to each question words ![](img/qa8.png)
-	- {$p_1,...,p_m$}: one vector for each passage token from bidirectional LSTM
-	- To compute start and end probability for each token
-		- $p_{start}(i) \propto exp(p_iW_sq)$
-		- $P_{end}(i) \propto exp(p_iW_eq)$ ![](img/qa9.png)
-- BERT-based model
-	- Fine-tune BERT to predict answer span
-		- $p_{start}(i) \propto exp(S^TT_i')$
-		- $p_{end}(i) \propto exp(E^TT_i')$ ![](img/qa10.png)
+	- how?
+		- Use a neural network to extract answer
+		- AKA **reading comprehension** task(assuming query and evidence passage are given, and find the span)
+		- But deep learning models require lots of data
+		- Do we have enough data to train comprehension models?
+	- dataset
+		- MCTest(a dataset)
+			- Crowdworkers write fictional stories, questions and answers
+			- 500 stories, 2000 questions
+			- Multiple choice questions ![](img/qa4.png)
+		- SQuAD
+			- Use Wikipedia passages(easier to create than MCTest)
+			- First set of crowdworkers create questions (given passage)
+			- Second set of crowdworkers label the answer
+			- 150K questions (!)
+			- Second version includes unanswerable questions(no answer in the passage) ![](img/qa5.png)
+	- reading comprehension
+		- Given a question and context passage, **predict where the answer span starts and end in passage**?
+		- Compute:
+			- $P_{start}(i)$: prob. of token i is the starting token
+			- $P_{end}(i)$: prob. of token i is the ending token ![](img/qa6.png)
+		- LSTM-based model
+			- Feed question tokens to a bidirectional LSTM
+			- Aggregate LSTM outputs via weighted sum to produce *q*, the final **question embedding** ![](img/qa7.png)
+			- Process passage in a similar way, using **another** bidirectional LSTM
+			- More than just word embeddings as input
+				- A feature to denote whether the word matches a question word
+				- POS feature
+				- Weighted question embedding: produced by attending to each question words ![](img/qa8.png)
+			- {$p_1,...,p_m$}: one vector for each passage token from bidirectional LSTM
+			- To compute start and end probability for each token
+				- $p_{start}(i) \propto exp(p_iW_sq)$
+				- $P_{end}(i) \propto exp(p_iW_eq)$ ![](img/qa9.png)
+		- BERT-based model
+			- Fine-tune BERT to predict answer span
+				- $p_{start}(i) \propto exp(S^TT_i')$
+				- $p_{end}(i) \propto exp(E^TT_i')$ ![](img/qa10.png)
+			- why BERT works better than LSTM
+				- It’s pre-trained and so already “knows” language before it’s adapted to the task
+				- Self-attention architecture allows fine-grained analysis between words in question and context paragraph
+
+### Knowledge-based QA
+- QA over structured KB
+	- Many large knowledge bases
+		- Freebase, DBpedia, Yago, …
+	- Can we support natural language queries?
+		- E.g.
+			- 'When was Ada Lovalace born?' $\to$ birth-year (Ada Lovelace, ?x)
+			- 'What is the capital of England' $\to$ capital-city(?x, England)
+		- Link “Ada Lovelace” with the correct entity in the KB to find triple (*Ada Lovelace, birth-year, 1815*)
+	- but
+		- Converting natural language sentence into triple is not trivial
+			- 'When was Ada Lovelace born' $\to$ birth-year (Ada Lovelace, ?x)
+		- Entity linking also an important component
+			- Ambiguity: “When was **Lovelace** born?”
+		- Can we simplify this two-step process?
+	- semantic parsing
+		- Convert questions into logical forms to query KB directly
+			- Predicate calculus
+			- Programming query (e.g. SQL) ![](img/qa11.png)
+		- how to build a semantic parser
+			- Text-to-text problem:
+				- Input = natural language sentence
+				- Output = string in logical form
+			- Encoder-decoder model(but do we have enough data?) ![](img/qa12.png)
+
+### Hybrid QA
+- hybrid methods
+	- Why not use both text-based and knowledgebased resources for QA?
+	- IBM’s Watson which won the game show Jeopardy! uses a wide variety of resources to answer questions
+		- (question)THEATRE: A new play based on this Sir Arthur Conan Doyle canine classic opened on the London stage in 2007.
+		- (answer)The Hound Of The Baskervilles
+- core idea of Watson
+	- Generate lots of candidate answers from textbased and knowledge-based sources
+	- Use a rich variety of evidence to score them
+	- Many components in the system, most trained separately ![](img/qa13.png) ![](img/qa14.png) ![](img/qa15.png) ![](img/qa16.png)
+- QA evaluation
+	- IR: Mean Reciprocal Rank for systems returning matching passages or answer strings
+		- E.g. system returns 4 passages for a query, first correct passage is the 3rd passage
+		- MRR = 1/3
+	- MCTest: Accuracy
+	- SQuAD: Exact match of string against gold answer
+
+### Conclusion
+- IR-based QA: search textual resources to answer questions
+	- Reading comprehension: assumes question+passage
+- Knowledge-based QA: search structured resources to answer questions
+- Hot area: many new approaches & evaluation datasets being created all the time (narratives, QA, commonsense reasoning, etc)
+
+## Lecture 20 Topic Modelling
+### Topic Modelling
+- makeingsense of text
+	- English Wikipedia: 6M articles
+	- Twitter: 500M tweets per day
+	- New York Times: 15M articles
+	- arXiv: 1M articles
+	- What can we do if we want to learn something about these document collections?
+- questions
+	- What are the less popular topics on Wikipedia?
+	- What are the big trends on Twitter in the past month?
+	- How do the themes/topics evolve over time in New York Times from 1900s to 2000s?
+	- What are some influential research areas?
+- topic models to the rescue
+	- Topic models learn common, overlapping themes in a document collection
+	- Unsupervised model
+		- No labels; input is just the documents!
+	- What’s the output of a topic model?
+		- Topics: each topic associated with a list of words
+		- Topic assignments: each document associated with a list of topics
+- what do topics look like
+	- A list of words
+	- Collectively describes a concept or subject
+	- Words of a topic typically appear in the same set of documents in the corpus ![](img/tm1.png)
+	- Wikipedia topics ![](img/tm2.png)
+	- Twitter topics ![](img/tm3.png)
+	- New York Times topics ![](img/tm4.png)
+- applications of topic models
+	- Personalised advertising
+	- Search engine
+	- Discover senses of polysemous words
+	- Part-of-speech tagging
+
+### A Brief History of Topic Models
+- latent semantic analysis ![](img/tm5.png) 
+	- LSA: truncate ![](img/tm6.png)
+	- issues
+		- Positive and negative values in the $U$ and $V^T$
+		- Difficult to interpret ![](img/tm7.png)
+- probabilistic LSA
+	- based on a probabilistic model ![](img/tm8.png)
+	- issues
+		- No more negative values!
+		- PLSA can learn topics and topic assignment for documents in the train corpus
+		- But it is unable to infer topic distribution on new documents
+		- PLSA needs to be re-trained for new documents
+- latent dirichlet allocation(LDA)
+	- Introduces a prior to the document-topic and topicword distribution
+	- Fully generative: trained LDA model can infer topics on unseen documents!
+	- LDA is a Bayesian version of PLSA
+
+### LDA
+- LDA
+	- Core idea: assume each document contains a mix of topics
+	- But the topic structure is hidden (latent)
+	- LDA infers the topic structure given the observed words and documents
+	- LDA produces soft clusters of documents (based on topic overlap), rather than hard clusters
+	- Given a trained LDA model, it can infer topics on new documents (not part of train data) ![](img/tm9.png)
+- input
+	- A collection of documents
+	- Bag-of-words
+	- Good preprocessing practice:
+		- Remove stopwords
+		- Remove low and high frequency word types
+		- Lemmatisation
+- output
+	- Topics: distribution over words in each topic ![](img/tm10.png)
+	- Topic assignment: distribution over topics in each document ![](img/tm11.png)
+- learning
+	- How do we learn the latent topics?
+	- Two main family of algorithms:
+		- Variational methods
+		- Sampling-based methods
+	- sampling method (Gibbs)
+		1. Randomly assign topics to all tokens in documents
+		2. Collect topic-word and document-topic co-occurrence statistics based on the assignments
+		3. Go through every word token in corpus and sample a new topic: $P(t_i|w,d) \propto P(t_i|w)P(t_i|d)$
+		4. Go to step 2 and repeat until convergence
+		
+		- when to stop
+			- Train until convergence
+			- Convergence = model probability of training set becomes stable
+			- How to compute model probability?
+				- $logP(w_1,w_2,...,w_m)=log\sum_{j=0}^TP(w_1|t_j)P(t_j|d_{w_1})+...+log\sum_{j=0}^TP(w_m|t_j)P(t_j|d_{w_m})$
+				- m = #word tokens
+				- $P(w_1|t_j) \to$ based on the topic-word co-occurrence matrix
+				- $P(t_j|d_{w_1}) \to$ based on the document-topic co-occurrence matrix
+		- infer topics for new documents
+			1. Randomly assign topics to all tokens in new/test documents
+			2. Update document-topic matrix based on the assignments; but use the trained topic-word matrix (kept fixed)
+			3. Go through every word in the test documents and sample topics: $P(t_i|w,d) \propto P(t_i|w)P(t_i|d)$
+			4. Go to step 2 and repeat until convergence
+		- hyper-parameters
+			- $T$: number of topic ![](img/tm12.png)
+			- $\beta$: prior on the topic-word distribution
+			- $\alpha$: prior on the document-topic distribution
+			- Analogous to *k* in add-*k* smoothing in *N*-gram LM
+			- Pseudo counts to initialise co-occurrence matrix: ![](img/tm13.png)
+			- High prior values → flatter distribution ![](img/tm14.png)
+				- a very very large value would lead to a uniform distribution
+			- Low prior values → peaky distribution ![](img/tm15.png)
+			- $\beta$: generally small (< 0.01)
+				- Large vocabulary, but we want each topic to focus on specific themes
+			- $\alpha$: generally larger (> 0.1)
+				- Multiple topics within a document
+
+### Evaluation
+- how to evaluate topic models
+	- Unsupervised learning $\to$ no labels
+	-  Intrinsic evaluation:
+		-  model logprob / perplexity on test documents
+		-  $logL=\sum_W\sum_TlogP(w|t)P(t|d_w)$
+		-  $ppl=exp^{\frac{-logL}{W}}$
+- issues with perlexity
+	- More topics = better (lower) perplexity
+	- Smaller vocabulary = better perplexity
+		- Perplexity not comparable for different corpora, or different tokenisation/preprocessing methods
+	- Does not correlate with human perception of topic quality
+	- Extrinsic evaluation the way to go:
+		- Evaluate topic models based on downstream task
+- topic coherence
+	- A better intrinsic evaluation method
+	- Measure how coherent the generated topics ![](img/tm16.png)
+	- A good topic model is one that generates more coherent topics
+- word intrusion
+	- Idea: inject one random word to a topic
+		- {farmers, farm, food, rice, agriculture} $\to$ {farmers, farm, food, rice, <font color=red>cat</font>, agriculture}
+	- Ask users to guess which is the intruder word
+	- Correct guess $\to$ topic is coherent
+	- Try guess the intruder word in:
+		- {choice, count, village, i.e., simply, unionist}
+	- Manual effort; does not scale
+- PMI $\approx$ coherence?
+	- High PMI for a pair of words → words are correlated
+		- PMI(farm, rice) $\uparrow$
+		- PMI(choice, village) $\downarrow$
+	- If all word pairs in a topic has high PMI $\to$ topic is coherent
+	- If most topics have high PMI $\to$ good topic model
+	- Where to get word co-occurrence statistics for PMI?
+		- Can use same corpus for topic model
+		- A better way is to use an external corpus (e.g. Wikipedia)
+- PMI
+	- Compute pairwise PMI of top-N words in a topic
+		- $PMI(t)=\sum_{j=2}^N\sum_{i=1}^{j-1}log\frac{P(w_i,w_j)}{P(w_i)P(w_j)}$
+	- Given topic: {farmers, farm, food, rice, agriculture}
+	- Coherence = sum PMI for all word pairs:
+		- PMI(farmers, farm) + PMI(farmers, food) + … + PMI(rice, agriculture)
+	- variants
+		- Normalised PMI
+			- $NPMI(t)=\sum_{j=2}^N\sum_{i=1}^{j-1}\frac{log\frac{P(w_i,w_j)}{P(w_i)P(w_j)}}{-logP(w_i,w_j)}$
+		- conditional probability
+			- $LCP(t)=\sum_{j=2}^N\sum_{i=1}^{j-1}log\frac{P(w_i,w_j)}{P(w_i)}$
+	- example ![](img/tm17.png)
+
+### Conclusion
+- Topic model: an unsupervised model for learning latent concepts in a document collection
+- LDA: a popular topic model
+	- Learning
+	- Hyper-parameters
+- How to evaluate topic models?
+	- Topic coherence
+
+## Lecture 21 Summarisation
+
+
