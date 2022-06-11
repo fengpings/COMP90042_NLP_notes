@@ -2623,5 +2623,293 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Topic coherence
 
 ## Lecture 21 Summarisation
+- summarisation
+	- Distill the most important information from a text to produce shortened or abridged version
+	- Examples
+		- outlines of a document
+		- abstracts of a scientific article
+		- headlines of a news article
+		- snippets of search result
+	- what to summarise
+		- Single-document summarisation
+			- Input: a single document
+			- Output: summary that characterise the content
+		- Multi-document summarisation
+			- Input: multiple documents
+			- Output: summary that captures the gist of all documents
+			- E.g. summarise a news event from multiple sources or perspectives
+	- how to summarise
+		- Extractive summarisation
+			- Summarise by selecting representative sentences from documents
+		- Abstractive summarisation
+			- Summarise the content in your own words
+			- Summaries will often be paraphrases of the original content
+	- goal of summarisation
+		- Generic summarisation
+			- Summary gives important information in the document(s)
+		- Query-focused summarisation
+			- Summary responds to a user query
+			- "Non-factoid" QA
+			- Answer is much longer than factoid QA ![](img/s1.png)
 
+### Extractive: Single-Doc
+- summarisation system
+	- Content selection: select what sentences to extract from the document
+	- Information ordering: decide how to order extracted sentences
+	- Sentence realisation: cleanup to make sure combined sentences are fluent ![](img/s2.png)
+	- We will focus on content selection
+	- For single-document summarisation, information ordering not necessary
+		- present extracted sentences in original order
+	- Sentence realisation also not necessary if they are presented in dot points
+- content selection
+	- Not much data with ground truth extractive sentences
+	- Mostly unsupervised methods
+	- Goal: Find sentences that are important or salient
+	- method1: TF-IDF
+		- Frequent words in a doc $\to$ salient
+		- But some generic words are very frequent but uninformative
+			- function words
+			- stop words
+		- Weigh each word $w$ in document $d$ by its inverse document frequency:
+			- $weight(w)=tf_{d,w} \times idf_w$
+	- method 2: Log Likelihood Ratio
+		- Intuition: a word is salient if its probability in the input corpus is very different to a background corpus
+		- $f(n)= \begin{cases} 1, & {if -2log\lambda(w)>10} \\ 0, & {otherwise} \end{cases}$
+		- $\lambda(w)$ is the ratio between:
+			- P(observing $w$ in $I$) $\to \begin{pmatrix} N_I \\ x \\ \end{pmatrix}p^x(1-p)^{N_I-x}$ and P(observing $w$ in $B$) $\to \begin{pmatrix} N_B \\ y \\ \end{pmatrix}p^y(1-p)^{N_B-y}$, assuming $P(w|I)=P(w|B)=p \to \frac{x+y}{N_I+N_B}$
+			- P(observing $w$ in $I$) $\to \begin{pmatrix} N_I \\ x \\ \end{pmatrix}p_I^{x_I}(1-p_I)^{N_I-x}$ and P(observing $w$ in $B$) $\to \begin{pmatrix} N_B \\ y \\ \end{pmatrix}p_B^y(1-p_B)^{N_B-y}$, assuming $P(w|I)=p_I \to \frac{x}{N_I} \  and \  P(w|B)=p_B \to \frac{y}{N_B}$
+		- saliency of a sentence
+			- $weight(s)=\frac{1}{|S|}\sum_{w\in{S}}weight(w)$
+			- only consider non-stop words in $S$
+	- method 3: sentence centrality
+		- Alternative approach to ranking sentences
+		- Measure distance between sentences, and choose sentences that are closer to other sentences
+		- Use tf-idf BOW to represent sentence
+		- Use cosine similarity to measure distanc
+		- $centrality(s)=\frac{1}{\# sent}\sum_{s'}cos_{tfidf}(s,s')$
+		- final extracted summary
+			- Use top-ranked sentences as extracted summary
+				- Saliency (tf-idf or log likelihood ratio)
+				- Centrality
+	- method 4: RST parsing ![](img/s3.png)
+		- Rhetorical structure theory (L12, Discourse): explain how clauses are connected
+		- Define the types of relations between a <font color=red>nucleus</font> (main clause) and a <font color=blue>satellite</font> (supporting clause) ![](img/s4.png)
+		- Nucleus more important than satellite
+		- A sentence that functions as a nucleus to more sentences = more salient ![](img/s5.png)
+		- which sentence is the best summary sentence?
 
+### Extractive: Multi-Doc
+- summarisation system
+	- Similar to single-document extractive summarisation system
+	- Challenges:
+		- Redundancy in terms of information
+		- Sentence ordering ![](img/s6.png)
+	- content selection
+		- We can use the same unsupervised content selection methods (tf-idf, log likelihood ratio, centrality) to select salient sentences
+		- But ignore sentences that are redundant
+	- Maximum Marginal Relevance
+		- Iteratively select the best sentence to add to summary
+		- Sentences to be added must be novel
+		- Penalise a candidate sentence if it’s similar to extracted sentences:
+			- $MMR-penalty(s)=\lambda max_{s_i\in{S}}sim(s,s_i)$ 
+		- Stop when a desired number of sentences are added
+	- Information Ordering
+		- Chronological ordering:
+			- Order by document dates
+		- Coherence:
+			- Order in a way that makes adjacent sentences similar
+			- Order based on how entities are organised (centering theory, L12) ![](img/s7.png)
+	- Sentence Realisation
+		- Make sure entities are referred coherently
+			- Full name at first mention
+			- Last name at subsequent mentions
+		- Apply coreference methods to first extract names
+		- Write rules to clean up ![](img/s8.png) ![](img/s9.png)
+
+### Abstractive: Single-Doc
+- example ![](img/s10.png)
+	- Paraphrase
+	- A very difficult task
+	- Can we train a neural network to generate summary?
+- Encoder-Decoder? ![](img/s11.png)
+	- What if we treat:
+		- Source sentence = “document”
+		- Target sentence = “summary” ![](img/s12.png)
+- data
+	- News headlines
+	- Document: First sentence of article
+	- Summary: News headline/title
+	- Technically more like a “headline generation task”
+	- and it kind of works.. ![](img/s13.png)
+	- More Summarisation Data
+		- But headline generation isn’t really exciting…
+		- Other summarisation data:
+			- CNN/Dailymail: 300K articles, summary in bullets
+			- Newsroom: 1.3M articles, summary by authors
+				- Diverse; 38 major publications
+			- XSum: 200K BBC articles
+				- Summary is more abstractive than other datasets
+- improvements
+	- Attention mechanism
+	- Richer word features: POS tags, NER tags, tf-idf
+	- Hierarchical encoders
+		- One LSTM for words
+		- Another LSTM for sentences ![](img/s14.png)
+- Potential issues of an attention encoderdecoder summarisation system?
+	- Has the potential to generate new details not in the source document
+	- Unable to handle unseen words in the source document
+	- Information bottleneck: a vector is used to represent the source document
+	- Can only generate one summary
+
+![](img/s15.png) ![](img/s16.png)
+
+- Copy Mechanism
+	- Generate summaries that reproduce details in the document
+	- Can produce out-of-vocab words in the summary by copying them in the document
+		- e.g. smergle = out of vocabulary
+		- p(smergle) = attention probability + generation probability = attention probability
+- latest development
+	- State-of-the-art models use transformers instead of RNNs
+	- Lots of pre-training
+	- Note: BERT not directly applicable because we need a unidirectional decoder (BERT is only an encoder)
+
+### Evaluation
+- ROUGE (Recall Oriented Understudy for Gisting Evaluation)
+	- Similar to BLEU, evaluates the degree of word overlap between generated summary and reference/human summary
+	- But recall oriented
+	- Measures overlap in N-grams separately (e.g. from 1 to 3)
+	- ROUGE-2: calculates the percentage of bigrams from the reference that are in the generated summary
+- ROUGE-2: example ![](img/s17.png)
+
+### Conclusion
+- Research focus on single-document abstractive summarisation
+- Mostly news data
+- But many types of data for summarisation:
+	- Images, videos
+	- Graphs
+	- Structured data: e.g. patient records, tables
+	- Multi-document abstractive summarisation
+
+## Lecture 22 Ethics
+*How we ought to live — Socrates*
+- what is ethics
+	- What is the right thing to do?
+	- Why?
+- Why Should We Care?
+	- AI technology is increasingly being deployed to real-world applications
+	- Have real and tangible impact to people
+	- Whose responsibility is it when things go bad?
+- Why Is Ethics Hard?
+	- Often no objective truth, unlike sciences
+	- A new philosophy student may ask whether fundamental ethical theories such as utilitarianism is right
+	- But unlikely a new physics student would question the laws of thermodynamics
+	- In examining a problem, we need to think from different perspectives to justify our reasons
+- Learning Outcomes
+	- Think more about the application you build
+		- Not just its performance
+		- Its social context
+		- Its impact to other people
+		- Unintended harms
+	- Be a socially-responsible scientist or engineer
+
+### Arguments Against Ethical Checks in NLP
+- Should We Censor Science?
+	- A common argument when ethical checks or processes are introduced:
+		- Should there be limits to scientific research? Is it right to censor research?
+	- Ethical procedures are common in other fields: medicine, biology, psychology, anthropology, etc
+	- In the past, this isn’t common in computer science
+	- But this doesn’t mean this shouldn’t change
+	- Technology are increasingly being integrated into society; the research we do nowadays are likely to be more deployed than 20 years ago
+- H5N1
+	- Ron Fouchier, a Dutch virologist, discovered how to make bird flu potentially more harmful in 2011
+	- Dutch government objected to publishing the research
+	- Raised a lot of discussions and concerns
+	- National policies enacted
+- Isn’t Transparency Always Better?
+	- Is it always better to publish sensitive research publicly?
+	- Argument: worse if they are done underground
+	- If goal is to raise awareness, scientific publication isn’t the only way
+		- Could work with media to raise awareness
+		- Doesn’t require exposing the technique
+- AI vs. Cybersecurity
+	- Exposing vulnerability publicly is desirable in cyber-security applications
+		- Easy for developer to fix the problem
+	- But the same logic doesn’t always apply for AI
+		- Not easy to fix, once the technology is out
+
+### Core NLP Ethics Concepts
+- Bias
+	- Two definitions:
+		- Value-neutral meaning in ML
+		- Normative meaning in socio-cultural studies
+	- Ethics research in NLP: harmful prejudices in models
+	- A biased model is one that performs unfavourably against certain groups of users
+		- typically based on demographic features such as gender or ethnicity
+	- Bias isn’t necessarily bad
+		- Guide the model to make informed decisions in the absence of more information
+		- Truly unbiased system = system that makes random decisions
+		- Bad when overwhelms evidence, or perpetuates harmful stereotypes
+	- Bias can arise from data, annotations, representations, models, or research design
+- Bias in Word Embeddings
+	- Word Analogy (lecture 10):
+		- v(man) - v(woman) = v(king) - v(queen)
+	- But!
+		- v(man) - v(woman) = v(programmer) - v(homemaker)
+		- v(father) - v(mother) = v(doctor) - v(nurse)
+	- Word embeddings reflect and amplify gender stereotypes in society
+	- Lots of work done to reduce bias in word embeddings
+- Dual Use
+	- Every technology has a primary use, and unintended secondary consequences
+		- uclear power, knives, electricity
+		- could be abused for things they are not originally designed to do.
+	- Since we do not know how people will use it, we need to be aware of this duality
+- OpenAI GPT-2
+	- OpenAI developed GPT-2, a large language model trained on massive web data
+	- Kickstarted the pretrained model paradigm in NLP
+		- Fine-tune pretrained models on downstream tasks (BERT lecture 11)
+	- GPT-2 also has amazing generation capability
+		- Can be easily fine-tuned to generate fake news, create propaganda
+	- Pretrained GPT-2 models released in stages over 9 months, starting with smaller models
+	- Collaborated with various organisations to study social implications of very large language models over this time
+	- OpenAI’s effort is commendable, but this is voluntary
+	- Further raises questions about self-regulation
+- Privacy
+	- Often conflated with anonymity
+	- Privacy means nobody know I am doing something
+	- Anonymity means everyone know what I am doing, but not that it is me
+- GDPR
+	- Regulation on data privacy in EU
+	- Also addresses transfer of personal data
+	- Aim to give individuals control over their personal data
+	- Organisations that process EU citizen’s personal data are subjected to it
+	- Organisations need to anonymise data so that people cannot be identified
+	- But we have technology to de-identify author attributes
+- AOL Search Data Leak
+	- In 2006, AOL released anonymised search logs of users
+	- Log contained sufficient information to de-identify individuals
+		- Through cross-referencing with phonebook listing an individual was identified
+	- Lawsuit filed against AOL
+
+### Group Discussion
+- Prompts
+	- Primary use: does it promote harm or social good?
+	- Bias?
+	- Dual use concerns?
+	- Privacy concerns? What sorts of data does it use?
+	- Other questions to consider:
+		- Can it be weaponised against populations (e.g. facial recognition, location tracking)?
+		- Does it fit people into simple categories (e.g. gender and sexual orientation)?
+		- Does it create alternate sets of reality (e.g. fake news)?
+- Automatic Prison Term Prediction
+	- A model that predicts the prison sentence of an individual based on court documents
+- Automatic CV Processing
+	- A model that processes CV/resumes for a job to automatically filter candidates for interview
+- Language Community Classification
+	- A text classification tool that distinguishes LGBTQ from heterosexual language
+	- Motivation: to understand how language used in the LGBTQ community differs from heterosexual community
+- Take Away
+	- Think about the applications you build
+	- Be open-minded: ask questions, discuss with others
+	- NLP tasks aren’t always just technical problems
+	- Remember that the application we build could change someone else’s life
+	- We should strive to be a socially responsible engineer/scientist
