@@ -2304,3 +2304,104 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 - Machine learning methods involve classifiers and sequence labelling models.
 
 ## Lecture 19 Question Answering
+### introduction
+- Definition: question answering (“QA”) is the task of automatically determining the answer for a natural language question
+- Mostly focus on “factoid” questions
+- factoid question
+	- Factoid questions, have short precise answers:
+		- What war involved the battle of Chapultepec?
+		- What is the date of Boxing Day?
+		- What are some fragrant white climbing roses?
+		- What are tannins?
+- non-factoid question
+	- General non-factoid questions require a longer answer, critical analysis, summary, calculation and more:
+		- Why is the date of Australia Day contentious?
+		- What is the angle 60 degrees in radians?
+- why focus on factoid questions
+	- They are easier
+	- They have an objective answer
+	- Current NLP technologies cannot handle non-factoid answers
+	- There’s less demand for systems to automatically answer non-factoid questions
+- 2 key approaches
+	- Information retrieval-based QA
+		- Given a query, search relevant documents
+		- Find answers within these relevant documents
+	- Knowledge-based QA
+		- Builds semantic representation of the query
+		- Query database of facts to find answers
+
+### IR-based QA
+- IR-based factoid QA: TREC-QA ![](img/qa1.png)
+	1. Use question to make query for IR engine
+	2. Find document, and passage within document
+	3. Extract short answer string
+- question processing
+	- Find key parts of question that will help retrieval
+		- Discard non-content words/symbols (wh-word, ?, etc)
+		- Formulate as tf-idf query, using unigrams or bigrams
+		- Identify entities and prioritise match
+	- May reformulate question using templates
+		- E.g. “Where is Federation Square located?”
+		- Query = “Federation Square located”
+		- Query = “Federation Square is located [in/at]”
+	- Predict expected answer type (here = LOCATION)
+- answer types
+	- Knowing the type of answer can help in:
+		- finding the right passage containing the answer
+		- finding the answer string
+	- Treat as classification
+		- given question, predict answer type
+		- key feature is question <font color=red>headword</font>
+		- *What are the <font color=red>animals</font> on the Australian coat of arms*?
+		- Generally not a difficult task ![](img/qa2.png) ![](img/qa3.png)
+- retrieval
+	- Find top n documents matching query (standard IR)
+	- Next find passages (paragraphs or sentences) in these documents (also driven by IR)
+	- Should contain:
+		- many instances of the question keywords
+		- several named entities of the answer type
+		- close proximity of these terms in the passage
+		- high ranking by IR engine
+	- Re-rank IR outputs to find best passage (e.g., using supervised learning)
+- answer extraction
+	- Find a concise answer to the question, as a span in the passage
+		- “Who is the federal MP for Melbourne?”
+		- *The Division of Melbourne is an Australian Electoral Division in Victoria, represented since the 2010 election by <font color=red>_Adam Bandt_</font>, a member of the Greens.*
+		- “How many Australian PMs have there been since 2013?”
+		- *Australia has had <font color=red>_five_</font> prime ministers in five years. No wonder Merkel needed a cheat sheet at the G-20.*
+- how?
+	- Use a neural network to extract answer
+	- AKA reading comprehension task
+	- But deep learning models require lots of data
+	- Do we have enough data to train comprehension models?
+- MCTest
+	- Crowdworkers write fictional stories, questions and answers
+	- 500 stories, 2000 questions
+	- Multiple choice questions ![](img/qa4.png)
+- SQuAD
+	- Use Wikipedia passages
+	- First set of crowdworkers create questions (given passage)
+	- Second set of crowdworkers label the answer
+	- 150K questions (!)
+	- Second version includes unanswerable questions ![](img/qa5.png)
+- reading comprehension
+	- Given a question and context passage, **predict where the answer span starts and end in passage**?
+	- Compute:
+		- $P_{start}(i)$: prob. of token i is the starting token
+		- $P_{end}(i)$: prob. of token i is the ending token ![](img/qa6.png)
+- LSTM-based model
+	- Feed question tokens to a bidirectional LSTM
+	- Aggregate LSTM outputs via weighted sum to produce *q*, the final q question embedding ![](img/qa7.png)
+	- Process passage in a similar way, using another bidirectional LSTM
+	- More than just word embeddings as input
+		- A feature to denote whether the word matches a question word
+		- POS feature
+		- Weighted question embedding: produced by attending to each question words ![](img/qa8.png)
+	- {$p_1,...,p_m$}: one vector for each passage token from bidirectional LSTM
+	- To compute start and end probability for each token
+		- $p_{start}(i) \propto exp(p_iW_sq)$
+		- $P_{end}(i) \propto exp(p_iW_eq)$ ![](img/qa9.png)
+- BERT-based model
+	- Fine-tune BERT to predict answer span
+		- $p_{start}(i) \propto exp(S^TT_i')$
+		- $p_{end}(i) \propto exp(E^TT_i')$ ![](img/qa10.png)
