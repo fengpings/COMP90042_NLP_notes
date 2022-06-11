@@ -2685,7 +2685,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Alternative approach to ranking sentences
 		- Measure distance between sentences, and choose sentences that are closer to other sentences
 		- Use tf-idf BOW to represent sentence
-		- Use cosine similarity to measure distanc
+		- Use cosine similarity to measure distance
 		- $centrality(s)=\frac{1}{\# sent}\sum_{s'}cos_{tfidf}(s,s')$
 		- final extracted summary
 			- Use top-ranked sentences as extracted summary
