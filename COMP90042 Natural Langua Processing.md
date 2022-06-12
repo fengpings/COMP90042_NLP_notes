@@ -2440,7 +2440,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 ### Hybrid QA
 - hybrid methods
 	- Why not use both text-based and knowledgebased resources for QA?
-	- IBM’s Watson which won the game show Jeopardy! uses a wide variety of resources to answer questions
+	- IBM’s Watson which won the game show *Jeopardy!* uses a wide variety of resources to answer questions
 		- (question)THEATRE: A new play based on this Sir Arthur Conan Doyle canine classic opened on the London stage in 2007.
 		- (answer)The Hound Of The Baskervilles
 - core idea of Watson
@@ -2469,42 +2469,41 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- arXiv: 1M articles
 	- What can we do if we want to learn something about these document collections?
 - questions
-	- What are the less popular topics on Wikipedia?
-	- What are the big trends on Twitter in the past month?
-	- How do the themes/topics evolve over time in New York Times from 1900s to 2000s?
-	- What are some influential research areas?
+	- What are the **less popular** topics on Wikipedia?
+	- What are the **big trends** on Twitter in the past month?
+	- How do the **social issues** evolve over time in New York Times from 1900s to 2000s?
+	- What are some **influential research areas**?
 - topic models to the rescue
-	- Topic models learn common, overlapping themes in a document collection
-	- Unsupervised model
+	- Topic models learn **common, overlapping themes** in a document collection
+	- **Unsupervised** model
 		- No labels; input is just the documents!
 	- What’s the output of a topic model?
-		- Topics: each topic associated with a list of words
-		- Topic assignments: each document associated with a list of topics
+		- **Topics**: each topic associated with a list of words
+		- **Topic assignments**: each document associated with a list of topics
 - what do topics look like
 	- A list of words
 	- Collectively describes a concept or subject
-	- Words of a topic typically appear in the same set of documents in the corpus ![](img/tm1.png)
-	- Wikipedia topics ![](img/tm2.png)
-	- Twitter topics ![](img/tm3.png)
+	- Words of a topic typically appear in the same set of documents in the corpus(words overlapping in documents) ![](img/tm1.png)
+	- Wikipedia topics(broad) ![](img/tm2.png)
+	- Twitter topics(short,conversational) ![](img/tm3.png)
 	- New York Times topics ![](img/tm4.png)
 - applications of topic models
-	- Personalised advertising
+	- Personalised advertising(e.g. types of products bought)
 	- Search engine
-	- Discover senses of polysemous words
-	- Part-of-speech tagging
+	- Discover senses of polysemous words(e.g. apple: fruit, company, two different clusters)
 
 ### A Brief History of Topic Models
 - latent semantic analysis ![](img/tm5.png) 
 	- LSA: truncate ![](img/tm6.png)
 	- issues
 		- Positive and negative values in the $U$ and $V^T$
-		- Difficult to interpret ![](img/tm7.png)
+		- Difficult to interpret(negative values) ![](img/tm7.png)
 - probabilistic LSA
-	- based on a probabilistic model ![](img/tm8.png)
+	- based on a probabilistic model to get rid of negative values ![](img/tm8.png)
 	- issues
 		- No more negative values!
 		- PLSA can learn topics and topic assignment for documents in the train corpus
-		- But it is unable to infer topic distribution on new documents
+		- But it is unable to infer topic distribution on **new documents**
 		- PLSA needs to be re-trained for new documents
 - latent dirichlet allocation(LDA)
 	- Introduces a prior to the document-topic and topicword distribution
@@ -2513,11 +2512,11 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 
 ### LDA
 - LDA
-	- Core idea: assume each document contains a mix of topics
-	- But the topic structure is hidden (latent)
+	- Core idea: assume each document contains **a mix of topics**
+	- But the topic structure is **hidden (latent)**
 	- LDA infers the topic structure given the observed words and documents
-	- LDA produces soft clusters of documents (based on topic overlap), rather than hard clusters
-	- Given a trained LDA model, it can infer topics on new documents (not part of train data) ![](img/tm9.png)
+	- LDA produces **soft clusters** of documents (based on topic overlap), rather than hard clusters
+	- Given a trained LDA model, it **can infer topics on new documents** (not part of train data) ![](img/tm9.png)
 - input
 	- A collection of documents
 	- Bag-of-words
@@ -2526,17 +2525,24 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Remove low and high frequency word types
 		- Lemmatisation
 - output
-	- Topics: distribution over words in each topic ![](img/tm10.png)
-	- Topic assignment: distribution over topics in each document ![](img/tm11.png)
+	- **Topics**: distribution over words in each topic ![](img/tm10.png)
+	- **Topic assignment**: distribution over topics in each document ![](img/tm11.png)
 - learning
 	- How do we learn the latent topics?
 	- Two main family of algorithms:
 		- Variational methods
 		- Sampling-based methods
 	- sampling method (Gibbs)
-		1. Randomly assign topics to all tokens in documents
-		2. Collect topic-word and document-topic co-occurrence statistics based on the assignments
-		3. Go through every word token in corpus and sample a new topic: $P(t_i|w,d) \propto P(t_i|w)P(t_i|d)$
+		1. Randomly assign topics to all tokens in documents ![](img/tm18.png)
+		2. Collect **topic-word and document-topic co-occurrence statistics** based on the assignments
+			- first give some psudo-counts in every cell of two matrix(smoothing,no event is 0) ![](img/tm19.png)
+			- collect co-occurrence statistics ![](img/tm20.png)
+		3. Go through every word token in corpus and sample a new topic:
+			- delete current topic assigned to a word ![](img/tm21.png)
+			- update two matrices ![](img/tm22.png)
+			- compute the probability distribution to sample: $P(t_i|w,d) \propto P(t_i|w)P(t_i|d)$ ($P(t_i|w) \to$ topic-word, $P(t_i|d) \to$ document-topic) ![](img/tm23.png)
+				- $P(t_1|w,d)=P(t_1|mouse)\times{P(t_1|d_1)}=\frac{0.01}{0.01+0.01+2.01}\times{\frac{1.1}{1.1+1.1+2.1}}$
+			- sample randomly based on the probability distribution
 		4. Go to step 2 and repeat until convergence
 		
 		- when to stop
@@ -2548,8 +2554,8 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 				- $P(w_1|t_j) \to$ based on the topic-word co-occurrence matrix
 				- $P(t_j|d_{w_1}) \to$ based on the document-topic co-occurrence matrix
 		- infer topics for new documents
-			1. Randomly assign topics to all tokens in new/test documents
-			2. Update document-topic matrix based on the assignments; but use the trained topic-word matrix (kept fixed)
+			1. Randomly assign topics to all tokens in new/test documents ![](img/tm24.png)
+			2. Update document-topic matrix based on the assignments; but use the trained topic-word matrix (kept fixed) ![](img/tm25.png)
 			3. Go through every word in the test documents and sample topics: $P(t_i|w,d) \propto P(t_i|w)P(t_i|d)$
 			4. Go to step 2 and repeat until convergence
 		- hyper-parameters
@@ -2558,9 +2564,9 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 			- $\alpha$: prior on the document-topic distribution
 			- Analogous to *k* in add-*k* smoothing in *N*-gram LM
 			- Pseudo counts to initialise co-occurrence matrix: ![](img/tm13.png)
-			- High prior values → flatter distribution ![](img/tm14.png)
+			- High prior values $\to$ flatter distribution ![](img/tm14.png)
 				- a very very large value would lead to a uniform distribution
-			- Low prior values → peaky distribution ![](img/tm15.png)
+			- Low prior values $\to$ peaky distribution ![](img/tm15.png)
 			- $\beta$: generally small (< 0.01)
 				- Large vocabulary, but we want each topic to focus on specific themes
 			- $\alpha$: generally larger (> 0.1)
@@ -2569,8 +2575,8 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 ### Evaluation
 - how to evaluate topic models
 	- Unsupervised learning $\to$ no labels
-	-  Intrinsic evaluation:
-		-  model logprob / perplexity on test documents
+	-  Intrinsic(内在的，固有的) evaluation:
+		-  model logprob / perplexity(困惑度，复杂度) on test documents
 		-  $logL=\sum_W\sum_TlogP(w|t)P(t|d_w)$
 		-  $ppl=exp^{\frac{-logL}{W}}$
 - issues with perlexity
@@ -2578,22 +2584,22 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Smaller vocabulary = better perplexity
 		- Perplexity not comparable for different corpora, or different tokenisation/preprocessing methods
 	- Does not correlate with human perception of topic quality
-	- Extrinsic evaluation the way to go:
+	- Extrinsic(外在的) evaluation the way to go:
 		- Evaluate topic models based on downstream task
 - topic coherence
 	- A better intrinsic evaluation method
-	- Measure how coherent the generated topics ![](img/tm16.png)
+	- Measure how **coherent** the generated topics (blue more coherent than red)![](img/tm16.png)
 	- A good topic model is one that generates more coherent topics
 - word intrusion
 	- Idea: inject one random word to a topic
 		- {farmers, farm, food, rice, agriculture} $\to$ {farmers, farm, food, rice, <font color=red>cat</font>, agriculture}
-	- Ask users to guess which is the intruder word
+	- Ask users to guess which is the **intruder word**
 	- Correct guess $\to$ topic is coherent
 	- Try guess the intruder word in:
 		- {choice, count, village, i.e., simply, unionist}
 	- Manual effort; does not scale
 - PMI $\approx$ coherence?
-	- High PMI for a pair of words → words are correlated
+	- High PMI for a pair of words $\to$ words are correlated
 		- PMI(farm, rice) $\uparrow$
 		- PMI(choice, village) $\downarrow$
 	- If all word pairs in a topic has high PMI $\to$ topic is coherent
@@ -2605,14 +2611,14 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Compute pairwise PMI of top-N words in a topic
 		- $PMI(t)=\sum_{j=2}^N\sum_{i=1}^{j-1}log\frac{P(w_i,w_j)}{P(w_i)P(w_j)}$
 	- Given topic: {farmers, farm, food, rice, agriculture}
-	- Coherence = sum PMI for all word pairs:
+	- **Coherence** = sum PMI for all word pairs:
 		- PMI(farmers, farm) + PMI(farmers, food) + … + PMI(rice, agriculture)
 	- variants
 		- Normalised PMI
 			- $NPMI(t)=\sum_{j=2}^N\sum_{i=1}^{j-1}\frac{log\frac{P(w_i,w_j)}{P(w_i)P(w_j)}}{-logP(w_i,w_j)}$
-		- conditional probability
+		- conditional probability (proved not as good as PMI)
 			- $LCP(t)=\sum_{j=2}^N\sum_{i=1}^{j-1}log\frac{P(w_i,w_j)}{P(w_i)}$
-	- example ![](img/tm17.png)
+	- example (PMI tends to favor rarer words, use NPMI to relieve this problem)![](img/tm17.png)
 
 ### Conclusion
 - Topic model: an unsupervised model for learning latent concepts in a document collection
@@ -2626,45 +2632,45 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 - summarisation
 	- Distill the most important information from a text to produce shortened or abridged version
 	- Examples
-		- outlines of a document
-		- abstracts of a scientific article
-		- headlines of a news article
-		- snippets of search result
+		- **outlines** of a document
+		- **abstracts** of a scientific article
+		- **headlines** of a news article
+		- **snippets** of search result
 	- what to summarise
-		- Single-document summarisation
+		- **Single-document summarisation**
 			- Input: a single document
 			- Output: summary that characterise the content
-		- Multi-document summarisation
+		- **Multi-document summarisation**（find overlapping information）
 			- Input: multiple documents
-			- Output: summary that captures the gist of all documents
+			- Output: summary that captures the gist(要点，主旨) of all documents
 			- E.g. summarise a news event from multiple sources or perspectives
 	- how to summarise
-		- Extractive summarisation
+		- **Extractive summarisation**
 			- Summarise by selecting representative sentences from documents
-		- Abstractive summarisation
+		- **Abstractive summarisation**
 			- Summarise the content in your own words
 			- Summaries will often be paraphrases of the original content
 	- goal of summarisation
-		- Generic summarisation
+		- **Generic summarisation**
 			- Summary gives important information in the document(s)
-		- Query-focused summarisation
+		- **Query-focused summarisation**
 			- Summary responds to a user query
 			- "Non-factoid" QA
 			- Answer is much longer than factoid QA ![](img/s1.png)
 
 ### Extractive: Single-Doc
 - summarisation system
-	- Content selection: select what sentences to extract from the document
-	- Information ordering: decide how to order extracted sentences
-	- Sentence realisation: cleanup to make sure combined sentences are fluent ![](img/s2.png)
-	- We will focus on content selection
+	- **Content selection**: select what sentences to extract from the document
+	- **Information ordering**: decide how to order extracted sentences
+	- **Sentence realisation**: cleanup to make sure combined sentences are fluent ![](img/s2.png)
+	- We will focus on **content selection**
 	- For single-document summarisation, information ordering not necessary
 		- present extracted sentences in original order
 	- Sentence realisation also not necessary if they are presented in dot points
 - content selection
 	- Not much data with ground truth extractive sentences
 	- Mostly unsupervised methods
-	- Goal: Find sentences that are important or salient
+	- Goal: Find sentences that are important or **salient**(显著的，突出的)
 	- method1: TF-IDF
 		- Frequent words in a doc $\to$ salient
 		- But some generic words are very frequent but uninformative
@@ -2673,15 +2679,15 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Weigh each word $w$ in document $d$ by its inverse document frequency:
 			- $weight(w)=tf_{d,w} \times idf_w$
 	- method 2: Log Likelihood Ratio
-		- Intuition: a word is salient if its probability in the input corpus is very different to a background corpus
+		- Intuition: a word is salient if its probability in the **input corpus** is very different to a **background corpus**(e.g. Wikipedia)
 		- $f(n)= \begin{cases} 1, & {if -2log\lambda(w)>10} \\ 0, & {otherwise} \end{cases}$
 		- $\lambda(w)$ is the ratio between:
-			- P(observing $w$ in $I$) $\to \begin{pmatrix} N_I \\ x \\ \end{pmatrix}p^x(1-p)^{N_I-x}$ and P(observing $w$ in $B$) $\to \begin{pmatrix} N_B \\ y \\ \end{pmatrix}p^y(1-p)^{N_B-y}$, assuming $P(w|I)=P(w|B)=p \to \frac{x+y}{N_I+N_B}$
-			- P(observing $w$ in $I$) $\to \begin{pmatrix} N_I \\ x \\ \end{pmatrix}p_I^{x_I}(1-p_I)^{N_I-x}$ and P(observing $w$ in $B$) $\to \begin{pmatrix} N_B \\ y \\ \end{pmatrix}p_B^y(1-p_B)^{N_B-y}$, assuming $P(w|I)=p_I \to \frac{x}{N_I} \  and \  P(w|B)=p_B \to \frac{y}{N_B}$
+			- numerator: P(observing $w$ in $I$) $\to \begin{pmatrix} N_I \\ x \\ \end{pmatrix}p^x(1-p)^{N_I-x}$ and P(observing $w$ in $B$) $\to \begin{pmatrix} N_B \\ y \\ \end{pmatrix}p^y(1-p)^{N_B-y}$, assuming $P(w|I)=P(w|B)=p \to \frac{x+y}{N_I+N_B}$
+			- denominato: P(observing $w$ in $I$) $\to \begin{pmatrix} N_I \\ x \\ \end{pmatrix}p_I^{x_I}(1-p_I)^{N_I-x}$ and P(observing $w$ in $B$) $\to \begin{pmatrix} N_B \\ y \\ \end{pmatrix}p_B^y(1-p_B)^{N_B-y}$, assuming $P(w|I)=p_I \to \frac{x}{N_I} \  and \  P(w|B)=p_B \to \frac{y}{N_B}$
 		- saliency of a sentence
 			- $weight(s)=\frac{1}{|S|}\sum_{w\in{S}}weight(w)$
 			- only consider non-stop words in $S$
-	- method 3: sentence centrality
+	- method 3: sentence centrality(find sentence )
 		- Alternative approach to ranking sentences
 		- Measure distance between sentences, and choose sentences that are closer to other sentences
 		- Use tf-idf BOW to represent sentence
@@ -2695,29 +2701,33 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Rhetorical structure theory (L12, Discourse): explain how clauses are connected
 		- Define the types of relations between a <font color=red>nucleus</font> (main clause) and a <font color=blue>satellite</font> (supporting clause) ![](img/s4.png)
 		- Nucleus more important than satellite
-		- A sentence that functions as a nucleus to more sentences = more salient ![](img/s5.png)
+		- A sentence that functions as a nucleus to more sentences = more salient (dashed arrow is satellite, solid arrow is nucleus)![](img/s5.png)
 		- which sentence is the best summary sentence?
+			- *Mars experiences frigid conditions*
 
 ### Extractive: Multi-Doc
 - summarisation system
 	- Similar to single-document extractive summarisation system
 	- Challenges:
-		- Redundancy in terms of information
-		- Sentence ordering ![](img/s6.png)
+		- Redundancy in terms of information(multiple documents contains the same information)
+		- Sentence ordering(can on longer use the original order) ![](img/s6.png)
 	- content selection
-		- We can use the same unsupervised content selection methods (tf-idf, log likelihood ratio, centrality) to select salient sentences
-		- But ignore sentences that are redundant
+		- We can use the same unsupervised content selection methods (tf-idf, log likelihood ratio, centrality) to select **salient sentences** from each of these documents individually
+		- But ignore sentences that are **redundant**
 	- Maximum Marginal Relevance
 		- Iteratively select the best sentence to add to summary
-		- Sentences to be added must be novel
+		- Sentences to be added must be **novel**(new information)
 		- Penalise a candidate sentence if it’s similar to extracted sentences:
-			- $MMR-penalty(s)=\lambda max_{s_i\in{S}}sim(s,s_i)$ 
+			- $MMR-penalty(s)=\lambda max_{s_i\in{S}}sim(s,s_i)$
+			- $s_i$ is a extracted sentence
+			- $s$ is a candidate sentence
+			- $S$ is the set of extracted sentences 
 		- Stop when a desired number of sentences are added
 	- Information Ordering
-		- Chronological ordering:
+		- **Chronological ordering**:
 			- Order by document dates
-		- Coherence:
-			- Order in a way that makes adjacent sentences similar
+		- **Coherence**:
+			- Order in a way that makes **adjacent sentences similar**
 			- Order based on how entities are organised (centering theory, L12) ![](img/s7.png)
 	- Sentence Realisation
 		- Make sure entities are referred coherently
@@ -2744,10 +2754,10 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- More Summarisation Data
 		- But headline generation isn’t really exciting…
 		- Other summarisation data:
-			- CNN/Dailymail: 300K articles, summary in bullets
-			- Newsroom: 1.3M articles, summary by authors
+			- **CNN/Dailymail**: 300K articles, summary in bullets
+			- **Newsroom**: 1.3M articles, summary by authors
 				- Diverse; 38 major publications
-			- XSum: 200K BBC articles
+			- **XSum**: 200K BBC articles
 				- Summary is more abstractive than other datasets
 - improvements
 	- Attention mechanism
@@ -2755,11 +2765,11 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Hierarchical encoders
 		- One LSTM for words
 		- Another LSTM for sentences ![](img/s14.png)
-- Potential issues of an attention encoderdecoder summarisation system?
-	- Has the potential to generate new details not in the source document
-	- Unable to handle unseen words in the source document
-	- Information bottleneck: a vector is used to represent the source document
-	- Can only generate one summary
+- Potential issues of an attention encoder-decoder summarisation system?
+	- Has the potential to generate new details not in the source document (yes)
+	- Unable to handle unseen words in the source document (yes, can only generate a closed set of words)
+	- Information bottleneck: a vector is used to represent the source document (no, use attention)
+	- Can only generate one summary (no)
 
 ![](img/s15.png) ![](img/s16.png)
 
@@ -2775,8 +2785,8 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 
 ### Evaluation
 - ROUGE (Recall Oriented Understudy for Gisting Evaluation)
-	- Similar to BLEU, evaluates the degree of word overlap between generated summary and reference/human summary
-	- But recall oriented
+	- Similar to BLEU, evaluates the degree of word overlap between **generated summary** and reference/human summary
+	- But recall oriented(BLEU is precision-oriented)
 	- Measures overlap in N-grams separately (e.g. from 1 to 3)
 	- ROUGE-2: calculates the percentage of bigrams from the reference that are in the generated summary
 - ROUGE-2: example ![](img/s17.png)
@@ -2801,8 +2811,8 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Whose responsibility is it when things go bad?
 - Why Is Ethics Hard?
 	- Often no objective truth, unlike sciences
-	- A new philosophy student may ask whether fundamental ethical theories such as utilitarianism is right
-	- But unlikely a new physics student would question the laws of thermodynamics
+	- A new philosophy student may ask whether fundamental ethical theories such as utilitarianism(实用主义，功利主义) is right
+	- But unlikely a new physics student would question the laws of thermodynamics(热力学)
 	- In examining a problem, we need to think from different perspectives to justify our reasons
 - Learning Outcomes
 	- Think more about the application you build
@@ -2813,7 +2823,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- Be a socially-responsible scientist or engineer
 
 ### Arguments Against Ethical Checks in NLP
-- Should We Censor Science?
+- Should We Censor(审查) Science?
 	- A common argument when ethical checks or processes are introduced:
 		- Should there be limits to scientific research? Is it right to censor research?
 	- Ethical procedures are common in other fields: medicine, biology, psychology, anthropology, etc
@@ -2856,7 +2866,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- But!
 		- v(man) - v(woman) = v(programmer) - v(homemaker)
 		- v(father) - v(mother) = v(doctor) - v(nurse)
-	- Word embeddings reflect and amplify gender stereotypes in society
+	- Word embeddings reflect and **amplify** gender stereotypes in society
 	- Lots of work done to reduce bias in word embeddings
 - Dual Use
 	- Every technology has a primary use, and unintended secondary consequences
@@ -2902,11 +2912,20 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 		- Does it create alternate sets of reality (e.g. fake news)?
 - Automatic Prison Term Prediction
 	- A model that predicts the prison sentence of an individual based on court documents
+		- bias: black people often give harsher sentence
+		- non-explainable if use deep learning
+		- is it reasonable to use AI to judge one's freedom in the first place?
 - Automatic CV Processing
 	- A model that processes CV/resumes for a job to automatically filter candidates for interview
+		- bias towards gender(stereotypes, does the model amplify the stereotype?)
+		- the system can be cheated
+		- how the data is sourced(privacy)
+		- the reason for rejection? deep learning is black box
 - Language Community Classification
 	- A text classification tool that distinguishes LGBTQ from heterosexual language
 	- Motivation: to understand how language used in the LGBTQ community differs from heterosexual community
+		- dual use: potentially can be used to classify LGBTQ person, discriminate people.
+		- 
 - Take Away
 	- Think about the applications you build
 	- Be open-minded: ask questions, discuss with others
