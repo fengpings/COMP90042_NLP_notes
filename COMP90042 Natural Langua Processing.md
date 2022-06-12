@@ -2802,6 +2802,7 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 
 ## Lecture 22 Ethics
 *How we ought to live — Socrates*
+
 - what is ethics
 	- What is the right thing to do?
 	- Why?
@@ -2925,7 +2926,6 @@ CFGs assume a constituency tree which identifies the **phrases** in a sentence, 
 	- A text classification tool that distinguishes LGBTQ from heterosexual language
 	- Motivation: to understand how language used in the LGBTQ community differs from heterosexual community
 		- dual use: potentially can be used to classify LGBTQ person, discriminate people.
-		- 
 - Take Away
 	- Think about the applications you build
 	- Be open-minded: ask questions, discuss with others
